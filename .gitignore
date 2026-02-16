@@ -1,0 +1,22 @@
+# .gitignore
+# Ignore Python, Node, and common build files
+*.pyc
+__pycache__/
+node_modules/
+dist/
+build/
+.env
+.DS_Store
+*.log
+*.sqlite3
+*.db
+coverage/
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Ignore OS-specific files
+Thumbs.db
