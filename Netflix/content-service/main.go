@@ -29,7 +29,8 @@ func main() {
 	}
 	defer db.Close()
 
-	_ = cache.NewClient(cfg)
+	redisClient := cache.NewClient(cfg)
+	defer redisClient.Close()
 
 	r := router.New()
 
