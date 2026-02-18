@@ -20,3 +20,14 @@ coverage/
 
 # Ignore OS-specific files
 Thumbs.db
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.sum
+vendor/
