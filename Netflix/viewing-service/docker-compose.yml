@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: viewing-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  viewing-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: viewing-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - JWT_SECRET=development-secret-change-in-production
+      - JWT_EXPIRATION=1h
+      - IDENTITY_SERVICE_URL=http://host.docker.internal:8081
+      - CONTENT_SERVICE_URL=http://host.docker.internal:8082
+      - MAX_CONCURRENT_STREAMS=4
+      - SESSION_TIMEOUT=24h
+      - HEARTBEAT_INTERVAL=30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    driver: local

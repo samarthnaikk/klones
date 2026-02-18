@@ -75,13 +75,47 @@ All configuration is done via environment variables:
 
 ## Building and Running
 
-### Build
+### Option 1: Docker Compose (Recommended)
+
+The easiest way to run the service with all dependencies:
+
 ```bash
-go build -o viewing-service ViewingService.go
+# Start the service and Redis
+docker-compose up -d
+
+# View logs
+docker-compose logs -f viewing-service
+
+# Stop the service
+docker-compose down
 ```
 
-### Run
+### Option 2: Docker (Manual)
+
 ```bash
+# Build the Docker image
+docker build -t viewing-service .
+
+# Run Redis
+docker run -d --name redis -p 6379:6379 redis:alpine
+
+# Run the service
+docker run -d --name viewing-service \
+  -p 8080:8080 \
+  -e REDIS_ADDR=host.docker.internal:6379 \
+  viewing-service
+
+# View logs
+docker logs -f viewing-service
+```
+
+### Option 3: Local Build
+
+```bash
+# Build
+go build -o viewing-service ViewingService.go
+
+# Run (requires Redis to be running locally)
 ./viewing-service
 ```
 
@@ -93,6 +127,17 @@ export JWT_SECRET=my-secret-key
 export MAX_CONCURRENT_STREAMS=4
 ./viewing-service
 ```
+
+## Testing
+
+A test script is provided to demonstrate the API:
+
+```bash
+# Make sure the service is running, then:
+./test-api.sh
+```
+
+**Note:** The service requires Redis for session storage. If Redis is not available, the service will start but session-related operations will fail.
 
 ## API Endpoints
 
@@ -300,6 +345,37 @@ Events are currently logged. In production, these should be published to a messa
 - `github.com/gorilla/mux` - HTTP router
 - `github.com/golang-jwt/jwt/v5` - JWT token generation
 - `github.com/google/uuid` - UUID generation
+
+## Quick Start
+
+1. **Start Redis** (required for session storage):
+   ```bash
+   docker run -d -p 6379:6379 redis:alpine
+   ```
+
+2. **Build and run the service**:
+   ```bash
+   go build -o viewing-service ViewingService.go
+   ./viewing-service
+   ```
+
+3. **Test the API**:
+   ```bash
+   ./test-api.sh
+   ```
+
+## Production Deployment
+
+For production deployment, consider:
+
+1. **Use Docker Compose or Kubernetes** for orchestration
+2. **Set strong JWT_SECRET** environment variable
+3. **Configure Redis with persistence** and authentication
+4. **Enable PostgreSQL** for durable session logs
+5. **Set up monitoring** and logging
+6. **Use a reverse proxy** (nginx, Traefik) for SSL termination
+7. **Configure rate limiting** at the proxy level
+8. **Set up alerts** for concurrency limits and service health
 
 ## Future Enhancements
 
